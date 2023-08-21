@@ -1,0 +1,27 @@
+server:
+  port: 3080
+spring:
+  application:
+    name: minio-upload-api
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://zengshen.org:3306/minio_upload?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+
+#mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+
+logging:
+  level:
+    com.zs.*.mapper: debug
+
+minio:
+  endpoint: http://zengshen.org:9000
+  access-key: root
+  access-secret: 12345678
+  bucket-map:
+    minio-upload: minio-upload
+    common-bucket: common
