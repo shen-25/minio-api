@@ -1,4 +1,4 @@
-package com.zs.minio.configuration;
+package com.zs.minio.config;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;

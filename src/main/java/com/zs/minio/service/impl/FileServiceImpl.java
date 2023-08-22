@@ -14,8 +14,9 @@ import com.zs.minio.model.dto.TaskInfoDTO;
 import com.zs.minio.model.dto.TaskRecordDTO;
 import com.zs.minio.model.entity.UploadTask;
 import com.zs.minio.model.param.InitTaskParam;
-import com.zs.minio.configuration.MinioProperties;
+import com.zs.minio.config.MinioProperties;
 import com.zs.minio.service.FileService;
+import com.zs.minio.utils.IdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -46,6 +47,9 @@ public class FileServiceImpl extends ServiceImpl<UploadTaskMapper, UploadTask> i
     @Autowired
     private UploadTaskMapper uploadTaskMapper;
 
+    @Autowired
+    private IdGenerator idGenerator;
+
     @Override
     public UploadTask getByIdentifier(String identifier) {
         return uploadTaskMapper.selectOne(new QueryWrapper<UploadTask>()
@@ -70,6 +74,7 @@ public class FileServiceImpl extends ServiceImpl<UploadTaskMapper, UploadTask> i
         String uploadId = initiateMultipartUploadResult.getUploadId();
 
         UploadTask task = new UploadTask();
+        task.setId(idGenerator.getId());
         int chunkNum = (int) Math.ceil(param.getTotalSize() * 1.0 / param.getChunkSize());
         task.setBucketName(bucketName)
                 .setChunkNum(chunkNum)
@@ -78,7 +83,8 @@ public class FileServiceImpl extends ServiceImpl<UploadTaskMapper, UploadTask> i
                 .setFileIdentifier(param.getIdentifier())
                 .setFileName(fileName)
                 .setObjectKey(key)
-                .setUploadId(uploadId);
+                .setUploadId(uploadId)
+                .setCreateTime(new Date());
         uploadTaskMapper.insert(task);
         return new TaskInfoDTO().setFinished(false).setTaskRecord(TaskRecordDTO.convertFromEntity(task)).setPath(getPath(bucketName, key));
     }

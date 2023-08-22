@@ -25,3 +25,4 @@ minio:
   bucket-map:
     minio-upload: minio-upload
     common-bucket: common
+    captcha: captcha

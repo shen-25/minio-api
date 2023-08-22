@@ -1,4 +1,4 @@
-package com.zs.minio.configuration;
+package com.zs.minio.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
