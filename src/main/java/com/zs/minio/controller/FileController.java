@@ -49,9 +49,11 @@ public class FileController {
     /**
      * 创建一个上传任务
      */
-    @PostMapping
-    public ApiRestResponse<TaskInfoDTO> initTask(@Valid @RequestBody InitTaskParam param) {
-        return ApiRestResponse.ok(fileService.initTask(param));
+    @PostMapping("/{bucketName}")
+    public ApiRestResponse<TaskInfoDTO> initTask(@PathVariable String bucketName,
+                                                 @Valid @RequestBody InitTaskParam param) {
+        TaskInfoDTO taskInfoDTO = fileService.initTask(bucketName, param);
+        return ApiRestResponse.ok(taskInfoDTO);
     }
 
 
@@ -68,7 +70,8 @@ public class FileController {
         Map<String, String> params = new HashMap<>();
         params.put("partNumber", partNumber.toString());
         params.put("uploadId", task.getUploadId());
-        return ApiRestResponse.ok(fileService.genPreSignUploadUrl(task.getBucketName(), task.getObjectKey(), params));
+        String url = fileService.genPreSignUploadUrl(task.getBucketName(), task.getObjectKey(), params);
+        return ApiRestResponse.ok(url);
     }
 
     /**
@@ -88,7 +91,7 @@ public class FileController {
     public ResponseEntity download(@RequestParam String id) throws IOException {
         UploadTask uploadTask = fileService.getById(id);
         if (uploadTask != null) {
-            File file = fileService.downloadFile(uploadTask.getObjectKey());
+            File file = fileService.downloadFile(uploadTask.getBucketName(),uploadTask.getObjectKey());
             byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
             HttpHeaders httpHeaders = new HttpHeaders();
             String extension = FilenameUtils.getExtension(uploadTask.getFileName());

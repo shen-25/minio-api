@@ -36,4 +36,5 @@ public class InitTaskParam {
      */
     @NotBlank(message = "文件名称不能为空")
     private String fileName;
+
 }

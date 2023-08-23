@@ -22,7 +22,7 @@ minio:
   endpoint: http://zengshen.org:9000
   access-key: root
   access-secret: 12345678
-  bucket-map:
-    minio-upload: minio-upload
-    common-bucket: common
-    captcha: captcha
+  bucket-list:
+    - minio-upload
+    - common
+    - captcha

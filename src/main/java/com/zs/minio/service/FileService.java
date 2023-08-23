@@ -26,7 +26,7 @@ public interface FileService extends IService<UploadTask> {
     /**
      * 初始化一个任务
      */
-    TaskInfoDTO initTask (InitTaskParam param);
+    TaskInfoDTO initTask (String bucketName,InitTaskParam param);
 
     /**
      * 获取文件地址
@@ -49,5 +49,5 @@ public interface FileService extends IService<UploadTask> {
     void merge (String identifier);
 
 
-     File downloadFile(String objectKey) throws IOException;
+     File downloadFile(String bucketName, String objectKey) throws IOException;
 }

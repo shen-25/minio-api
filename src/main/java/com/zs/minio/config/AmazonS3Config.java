@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author word
@@ -28,6 +29,9 @@ public class AmazonS3Config {
 
     @Bean
     public AmazonS3 amazonS3 (MinioProperties minioProperties) {
+        if (CollectionUtils.isEmpty(minioProperties.getBucketList())) {
+            throw new RuntimeException("启动失败，请配置yml下的minion bucket-list");
+        }
         //设置连接时的参数
         ClientConfiguration config = new ClientConfiguration();
         //设置连接方式为HTTP，可选参数为HTTP和HTTPS
@@ -38,8 +42,8 @@ public class AmazonS3Config {
         AWSCredentials credentials = new BasicAWSCredentials(minioProperties.getAccessKey(), minioProperties.getAccessSecret());
         //设置Endpoint
         AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(minioProperties.getEndpoint(), Regions.US_EAST_1.name());
-        log.info("amazonS3Client配置成功,  amazonS3Client endpoint: {}, bucketMap: {}",
-                minioProperties.getEndpoint(), minioProperties.getBucketMap());
+        log.info("amazonS3Client配置成功,  amazonS3Client endpoint: {}, bucketList: {}",
+                minioProperties.getEndpoint(), minioProperties.getBucketList());
 
         return AmazonS3ClientBuilder.standard()
                 .withClientConfiguration(config)

@@ -27,7 +27,7 @@ const getTaskInfo = async (file) => {
         totalSize: file.size,
         chunkSize: 5 * 1024 * 1024,
       };
-      const { code, data, msg } = await initTask(initTaskData);
+      const { code, data, msg } = await initTask("common", initTaskData);
       if (code === 200) {
         task = data;
       } else {

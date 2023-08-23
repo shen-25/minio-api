@@ -23,6 +23,7 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
@@ -58,11 +59,13 @@ public class FileServiceImpl extends ServiceImpl<UploadTaskMapper, UploadTask> i
 
 
     @Override
-    public TaskInfoDTO initTask(InitTaskParam param) {
+    public TaskInfoDTO initTask(String bucketName, InitTaskParam param) {
 
         Date currentDate = new Date();
-        Map<String, String> bucketMap = minioProperties.getBucketMap();
-        String bucketName = bucketMap.get("minio-upload");
+        List<String> bucketList = minioProperties.getBucketList();
+        if (!bucketList.contains(bucketName)) {
+            throw new RuntimeException("上传路径错误,创建任务失败");
+        }
         String fileName = param.getFileName();
         String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
         String key = StrUtil.format("{}/{}.{}", DateUtil.format(currentDate, "yyyy-MM-dd"), UUID.fastUUID().toString(true), suffix);
@@ -131,7 +134,6 @@ public class FileServiceImpl extends ServiceImpl<UploadTaskMapper, UploadTask> i
         if (task == null) {
             throw new RuntimeException("分片任务不存在");
         }
-
         ListPartsRequest listPartsRequest = new ListPartsRequest(task.getBucketName(), task.getObjectKey(), task.getUploadId());
         PartListing partListing = amazonS3.listParts(listPartsRequest);
         List<PartSummary> parts = partListing.getParts();
@@ -139,7 +141,8 @@ public class FileServiceImpl extends ServiceImpl<UploadTaskMapper, UploadTask> i
             // 已上传分块数量与记录中的数量不对应，不能合并分块
             throw new RuntimeException("分片缺失，请重新上传");
         }
-        CompleteMultipartUploadRequest completeMultipartUploadRequest = new CompleteMultipartUploadRequest()
+        CompleteMultipartUploadRequest completeMultipartUploadRequest =
+                new CompleteMultipartUploadRequest()
                 .withUploadId(task.getUploadId())
                 .withKey(task.getObjectKey())
                 .withBucketName(task.getBucketName())
@@ -148,10 +151,12 @@ public class FileServiceImpl extends ServiceImpl<UploadTaskMapper, UploadTask> i
     }
 
     @Override
-    public File downloadFile(String objectKey) throws IOException {
+    public File downloadFile(String bucketName, String objectKey) throws IOException {
         File file = File.createTempFile("temp","");
-        Map<String, String> bucketMap = minioProperties.getBucketMap();
-        String bucketName = bucketMap.get("minio-upload");
+        List<String> bucketList = minioProperties.getBucketList();
+        if (!bucketList.contains(bucketName)) {
+            throw new FileNotFoundException("文件路径错误！下载文件失败");
+        }
         amazonS3.getObject(new GetObjectRequest(bucketName, objectKey), file);
         return file;
     }
